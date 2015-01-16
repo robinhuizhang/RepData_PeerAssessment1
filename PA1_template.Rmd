@@ -1,20 +1,113 @@
-# Reproducible Research: Peer Assessment 1
+#This is a personal activity data analysis markdown file.
+
+##1. Loading and preprocessing the data
+
+```{r}
+getwd()
+setwd("/Users/hui/datasciencecourses/reproducibleResearch/RepData_PeerAssessment1")
+getwd()
+
+activity <- read.csv("activity.csv",header=TRUE)
+str(activity)
+
+cleanActivity <- activity[!is.na(activity$steps), ]
+```
+
+##2.What is mean total number of steps taken per day?
+```{r}
+library(plyr)
+# group values by date
+groupedByDate <- ddply(cleanActivity, ~date, summarise, sum = sum(steps))
+#groupedByDate
+#Make a histogram of the total number of steps taken each day
+hist(groupedByDate$sum, xlab = "Total Steps", main = "Histogram total steps each day", 
+     col = "black")
+
+# Calculate mean value
+mean(groupedByDate$sum)
+
+# Calculate median value
+median(groupedByDate$sum)
+```
+
+##3. What is the average daily activity pattern?
+```{r}
+# Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average #number of steps taken, averaged across all days (y-axis)
+groupedByInterval <- ddply(cleanActivity, ~interval, summarise, mean = mean(steps))
+with(groupedByInterval, plot(interval, mean, type = "l", ylab = "Average number of steps", 
+                             xlab = "Interval", main = "Average daily activity", col = "black"))
+
+# Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+# first find max value
+maxVal <- max(groupedByInterval$mean)
+print(maxVal)
+
+# locate the line containing this value
+maxLine <- groupedByInterval[groupedByInterval$mean == maxVal, ]
+# find the interval
+maxInterval <- maxLine$interval
+print(maxInterval)
+
+```
+
+##4. Imputing missing values
+```{r}
+#  Calculate and report the total number of missing values in the dataset (i.e. the total number #of rows with NAs)
+sum(is.na(activity$steps))
+
+# Devise a strategy for filling in all of the missing values in the dataset. The strategy does #not need to be sophisticated. For example, you could use the mean/median for that day, or the #mean for that 5-minute interval, etc.
+# create a new dataset
+newdata <- activity
+# locate tha NAs
+missingsteps <- is.na(newdata$steps)
+# convert interval(s) to factor(s)
+newdata$interval <- factor(newdata$interval)
+groupedByInterval$interval <- factor(groupedByInterval$interval)
+
+# fill newdata on missing values wherever we have a missing value, fill it
+# from groupedByInterval$mean column (steps) where newdata$interval ==
+# groupedByInterval$interval (intervals are factors)
+#newdata[missingsteps, "interval"]
+class(newdata[missingsteps, "interval"])
+newdata[missingsteps, "steps"] <- groupedByInterval[newdata[missingsteps, "interval"], 
+                                                    "mean"]
+
+# group values by date
+groupedByDate2 <- ddply(newdata, ~date, summarise, sum = sum(steps))
+
+# construct the histogram
+hist(groupedByDate2$sum, xlab = "Total Steps", main = "Histogram total steps per day", 
+     col = "darkmagenta")
+
+# Calculate mean value
+mean(groupedByDate2$sum)
+# Calculate median value
+median(groupedByDate2$sum)
+
+```
+
+##5. Are there differences in activity patterns between weekdays and weekends?
+```{r}
+
+# add a new column containing day of week
+# change factor type to Date then use function weekdays
+newdata$weekday = weekdays(as.Date(newdata$date, format="%Y-%m-%d"))
+# add a new column containing either Weekday OR Weekend
+newdata$weekday.type <- ifelse(newdata$weekday == "Saturday" | newdata$weekday == 
+                                   "Sunday", "Weekend", "Weekday")
+# convert column to factor
+newdata$weekday.type <- factor(newdata$weekday.type)
+
+# make a new dataset grouping data by interval and weekday.type
+groupedBy.Interval.WeekDay <- ddply(newdata, ~interval + weekday.type, summarise, 
+                                    mean = mean(steps))
+
+# convert to characters first
+groupedBy.Interval.WeekDay$interval <- as.numeric(as.character(groupedBy.Interval.WeekDay$interval))
+library(lattice)
+xyplot(mean ~ interval | weekday.type, groupedBy.Interval.WeekDay, type = "l", 
+       layout = c(1, 2), xlab = "Interval", ylab = "Number of steps")
 
 
-## Loading and preprocessing the data
+```
 
-
-
-## What is mean total number of steps taken per day?
-
-
-
-## What is the average daily activity pattern?
-
-
-
-## Imputing missing values
-
-
-
-## Are there differences in activity patterns between weekdays and weekends?
