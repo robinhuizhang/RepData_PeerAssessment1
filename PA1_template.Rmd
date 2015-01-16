@@ -14,6 +14,7 @@ cleanActivity <- activity[!is.na(activity$steps), ]
 ```
 
 ##2.What is mean total number of steps taken per day?
+### Make histogram to show  total steps each day
 ```{r}
 library(plyr)
 # group values by date
@@ -22,9 +23,17 @@ groupedByDate <- ddply(cleanActivity, ~date, summarise, sum = sum(steps))
 #Make a histogram of total number of steps taken each day
 hist(groupedByDate$sum, xlab = "Total Steps", main = "Histogram total steps each day", 
      col = "black")
+```
+
+### What is the mean total number of steps?
+```{r}
 
 # Calculate mean value
 mean(groupedByDate$sum)
+```
+
+### What is the median total number of steps?
+```{r}
 
 # Calculate median value
 median(groupedByDate$sum)
@@ -36,8 +45,10 @@ median(groupedByDate$sum)
 groupedByInterval <- ddply(cleanActivity, ~interval, summarise, mean = mean(steps))
 with(groupedByInterval, plot(interval, mean, type = "l", ylab = "Average number of steps", 
                              xlab = "Interval", main = "Average daily activity", col = "black"))
+```
 
-# Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+### Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+```{r}
 # first find max value
 maxVal <- max(groupedByInterval$mean)
 print(maxVal)
@@ -51,11 +62,14 @@ print(maxInterval)
 ```
 
 ##4. Imputing missing values
+### How many missing values are there in the dataset?
 ```{r}
 #  Calculate and report the total number of missing values in the dataset (i.e. the total number #of rows with NAs)
 sum(is.na(activity$steps))
+```
 
-# Devise a strategy for filling in all of the missing values in the dataset. The strategy does #not need to be sophisticated. For example, you could use the mean/median for that day, or the #mean for that 5-minute interval, etc.
+### Devise a strategy for filling in all of the missing values in the dataset and then plot. I use the mean for 5-minute interval.
+```{r}
 # create a new dataset
 newdata <- activity
 # locate tha NAs
@@ -78,9 +92,16 @@ groupedByDate2 <- ddply(newdata, ~date, summarise, sum = sum(steps))
 # construct the histogram
 hist(groupedByDate2$sum, xlab = "Total Steps", main = "Histogram total steps per day", 
      col = "darkmagenta")
+```
 
+###After filling missing values, what is the mean total number of steps?
+```{r}
 # Calculate mean value
 mean(groupedByDate2$sum)
+```
+
+###After filling missing values, what is the median total number of steps?
+```{r}
 # Calculate median value
 median(groupedByDate2$sum)
 
