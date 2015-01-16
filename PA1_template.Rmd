@@ -19,7 +19,7 @@ library(plyr)
 # group values by date
 groupedByDate <- ddply(cleanActivity, ~date, summarise, sum = sum(steps))
 #groupedByDate
-#Make a histogram of the total number of steps taken each day
+#Make a histogram of total number of steps taken each day
 hist(groupedByDate$sum, xlab = "Total Steps", main = "Histogram total steps each day", 
      col = "black")
 
